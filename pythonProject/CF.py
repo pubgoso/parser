@@ -1,5 +1,10 @@
+import datetime
+
 from pip._vendor import requests
+
 from bs4 import BeautifulSoup
+
+ListOfName = []
 
 
 def request(address):
@@ -14,21 +19,74 @@ def request(address):
         return None
 
 
-url = 'http://codeforces.com/submissions/wzh520wzh/page/1'
-html = request(url)
-soup = BeautifulSoup(html, 'lxml')
-temp = soup.find(class_='status-frame-datatable').find_all('tr')
+def get_interval(day):  # 获取日期
+    localtime = datetime.date.today()
+    pre_time = localtime - datetime.timedelta(days=day)
+    return pre_time
 
-for item in temp:
-    data = ''
-    print(item.get_text())
-    if item.find(class_='rated-user user-orange') is not None:  # username
-        data += '用户名=' + item.find(class_='rated-user user-orange').get_text()
-    data += ' 评测信息: '
-    if item.find(class_='verdict-accepted') is not None:  # ac
-        data += item.find(class_='verdict-accepted').string
-    if item.find(class_='verdict-rejected') is not None:  # reject
-        data += item.find(class_='verdict-rejected').get_text()
-    print(data)
-    # if item.find(class_='verdict-format-judged') is not None:
-    #     print(item.find(class_='verdict-format-judged').get_text())
+
+def query(userName, page):
+    url = 'http://codeforces.com/submissions/' + userName + '/page/' + str(page)
+    html = request(url)
+    soup = BeautifulSoup(html, 'lxml')
+    temp = soup.find(class_='status-frame-datatable').find_all('tr')
+    ac = 0
+    tot = 0
+    for item in temp:  # 统计当前页的提交次数 和ac数
+        tot += 1
+        if item.find(class_='verdict-accepted') is not None:  # ac
+            ac += 1
+
+    return tot, ac
+
+
+def get_max_page(userName, index):  # 获取最大的页
+    url = 'http://codeforces.com/submissions/' + userName + '/page/' + str(index)
+    html = request(url)
+    soup = BeautifulSoup(html, 'lxml')
+    page = 0
+    temp = soup.find_all(class_='page-index')
+    for item in temp:
+        if item.find('a') is not None:
+            page = max(page, int(item.find('a').string))
+
+    return page
+
+
+def find_all_user():  # 获取需要的用户信息 这里选择一个organization了
+    url = 'http://codeforces.com/ratings/organization/21265'
+    html = request(url)
+    soup = BeautifulSoup(html, 'lxml')
+
+    vector = soup.find(class_='datatable ratingsDatatable').find_all(class_='rated-user user-cyan')
+    for item in vector:
+        ListOfName.append(item.string)
+    vector = soup.find(class_='datatable ratingsDatatable').find_all(class_='rated-user user-green')
+    for item in vector:
+        ListOfName.append(item.string)
+    vector = soup.find(class_='datatable ratingsDatatable').find_all(class_='rated-user user-gray')
+    for item in vector:
+        ListOfName.append(item.string)
+    vector = soup.find(class_='datatable ratingsDatatable').find_all(class_='rated-user user-blue')
+    for item in vector:
+        ListOfName.append(item.string)
+
+
+def solve():
+    for item in ListOfName:
+        max_page = get_max_page(item, 1)
+        tot = 0
+        ac = 0
+        for i in range(1, max_page + 1):
+            (x, y) = query(item, i)
+            tot += x
+            ac += y
+        if tot == 0:
+            print(item + '共提交' + str(tot) + '次' + ' ;通过 ' + str(ac) + '次 ; ' + '正确率为: ' + ' 0.00% ')
+        else:
+            print(item + '共提交' + str(tot) + '次' + ' ;通过 ' + str(ac) + '次 ; ' + '正确率为: ' + str(
+                round(ac / tot, 4) * 100) + ' % ')
+
+
+find_all_user()
+solve()

@@ -1,29 +1,17 @@
-# parser
-爬虫学习笔记
-
-爬取豆瓣top 250的电影信息。
-
-
-
-[参考自](https://mp.weixin.qq.com/s/zzTRw4w6SFSeUDGlUCvXGw)
-
-
-
-爬虫在html页面中通过find 标签来获取信息进行处理。
-
-
-
-# 注意点：
-
-1.request.get的时候要加入请求头headers。
-
-
-
-待完善补充...
-
-
-
-# 开发工具：
+## 开发工具：
 
 1.PyCharm 2020.3.3 (Professional Edition)
 
+
+
+# cf管理工具的逐步开发
+
+初学者，慢慢堆...
+
+
+
+## day1
+
+1.获取某个组织的所有用户的提交次数和ac次数
+
+可能由于网络问题，导致效率低下，后期考虑vpn或者优化一下代码逻辑 
